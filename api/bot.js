@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Bot, HttpError, GrammyError } = require("grammy");
+const { Bot, webhookCallback, HttpError, GrammyError } = require("grammy");
 
 // Bot
 
@@ -89,9 +89,9 @@ bot.on("msg", async (ctx) => {
       if (error instanceof GrammyError) {
         if (error.message.includes("Forbidden: bot was blocked by the user")) {
           console.log("Bot was blocked by the user");
-        } else if (error.message.includes("Call to 'sendVideo' failed!")) {
-          console.log("Error sending video");
-          await ctx.reply(`*Error contacting Twitter.*`, {
+        } else if (error.message.includes("Call to 'sendDocument' failed!")) {
+          console.log("Error sending document");
+          await ctx.reply(`*Error contacting Github.*`, {
             parse_mode: "Markdown",
             reply_to_message_id: ctx.msg.message_id,
           });
@@ -106,7 +106,7 @@ bot.on("msg", async (ctx) => {
       } else {
         console.log(`An error occured:`, error);
         await ctx.reply(
-          `*An error occurred. Are you sure you sent a valid Twitter link?*\n_Error: ${error.message}_`,
+          `*An error occurred. Are you sure you sent a valid Github repo link?*\n_Error: ${error.message}_`,
           { parse_mode: "Markdown", reply_to_message_id: ctx.msg.message_id }
         );
         return;
@@ -142,4 +142,4 @@ bot.catch((err) => {
 
 // Run
 
-bot.start();
+export default webhookCallback(bot, "http");
