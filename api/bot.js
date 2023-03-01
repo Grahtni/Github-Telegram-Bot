@@ -1,5 +1,7 @@
 require("dotenv").config();
 const { Bot, webhookCallback, HttpError, GrammyError } = require("grammy");
+const url = require("url");
+const path = require("path");
 
 // Bot
 
@@ -73,15 +75,23 @@ bot.on("msg", async (ctx) => {
     }
     await deleteMessageWithDelay(ctx.from.id, statusMessage.message_id, 3000);
     try {
+      const repoUrl = ctx.msg.text;
+      const parsedUrl = url.parse(repoUrl);
+      const repoPath = parsedUrl.pathname.substring(1);
+      const repoName = path.basename(repoPath).replace(/-/g, " ");
       if (ctx.msg.text.endsWith("/")) {
         let repoLink =
           ctx.msg.text.slice(0, -1) + "/archive/refs/heads/main.zip";
         await ctx.replyWithDocument(repoLink, {
+          caption: `<b><a href="${ctx.msg.text}">${repoName}</a></b>`,
+          parse_mode: "HTML",
           reply_to_message_id: ctx.msg.message_id,
         });
       } else {
         let repoLink = (ctx.msg.text += "/archive/refs/heads/main.zip");
         await ctx.replyWithDocument(repoLink, {
+          caption: `<b><a href="${ctx.msg.text}">${repoName}</a></b>`,
+          parse_mode: "HTML",
           reply_to_message_id: ctx.msg.message_id,
         });
       }
@@ -104,7 +114,7 @@ bot.on("msg", async (ctx) => {
         console.log(`Error sending message: ${error.message}`);
         return;
       } else {
-        console.log(`An error occured:`, error);
+        console.log(`An error occurred:`, error);
         await ctx.reply(
           `*An error occurred. Are you sure you sent a valid Github repo link?*\n_Error: ${error.message}_`,
           { parse_mode: "Markdown", reply_to_message_id: ctx.msg.message_id }
