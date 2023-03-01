@@ -1,5 +1,7 @@
 require("dotenv").config();
 const { Bot, HttpError, GrammyError } = require("grammy");
+const url = require("url");
+const path = require("path");
 
 // Bot
 
@@ -73,15 +75,21 @@ bot.on("msg", async (ctx) => {
     }
     await deleteMessageWithDelay(ctx.from.id, statusMessage.message_id, 3000);
     try {
+      const repoUrl = ctx.msg.id;
+      const parsedUrl = url.parse(repoUrl);
+      const repoPath = parsedUrl.pathname.substring(1);
+      const repoName = path.basename(repoPath).replace(/-/g, " ");
       if (ctx.msg.text.endsWith("/")) {
         let repoLink =
           ctx.msg.text.slice(0, -1) + "/archive/refs/heads/main.zip";
         await ctx.replyWithDocument(repoLink, {
+          caption: repoName,
           reply_to_message_id: ctx.msg.message_id,
         });
       } else {
         let repoLink = (ctx.msg.text += "/archive/refs/heads/main.zip");
         await ctx.replyWithDocument(repoLink, {
+          caption: repoName,
           reply_to_message_id: ctx.msg.message_id,
         });
       }
